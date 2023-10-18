@@ -123,6 +123,7 @@ define([],
                 const softwareNetSec5year = 17
                 const softwareNetSec6Year = 18
                 const softwareNetSec7Year = 19
+                const softwareNetSec90Day = 28
                 const softwareNoTerm = 1
                 const softwareWifi1Year = 20
                 const softwareWifi3Year = 21
@@ -157,6 +158,7 @@ define([],
                 const ratable1YearPlus16Days = 16
                 const ratable3YearPlus16Days = 21
                 const ratable30DaysPlus52Days = 27
+                const ratable90DaysPlus52Days = 30
                 const ratable1YearPlus52Days = 17
                 const ratable2YearPlus52Days = 19
                 const ratable3YearPlus52Days = 22
@@ -171,6 +173,7 @@ define([],
                 const ratable1Year = 8
                 const ratable3Year = 10
                 const ratable30Days = 14
+                const ratable90Days = 32
                 const ratable2Year = 9
                 const ratable5Year = 11
                 const ratable6Year = 12
@@ -334,8 +337,6 @@ define([],
 
                 }
 
-
-
                 if ((recordType == 'noninventoryitem' && [virtualHardware, revRecBaseBoxAppliance].includes(Number(skuCategory)) && ['Sale'].includes(itemSubType)) || (recordType == 'serviceitem' && [msspBRFirmware, msspVirtualHardware].includes(Number(skuCategory)) && ['Sale'].includes(itemSubType))) {
 
                     record.setValue({
@@ -350,7 +351,7 @@ define([],
 
                 }
 
-               if ((recordType == 'serviceitem' && [softwareTerm, softwareBandedTerm, softwareOneTime, softwareTermInitial, softwareBandedTermInitial].includes(Number(skuCategory)) && ['Sale'].includes(itemSubType))
+                if ((recordType == 'serviceitem' && [softwareTerm, softwareBandedTerm, softwareOneTime, softwareTermInitial, softwareBandedTermInitial].includes(Number(skuCategory)) && ['Sale'].includes(itemSubType))
                     || (recordType == 'noninventoryitem' && [revRecBaseBoxSoftware].includes(Number(skuCategory)) && ['Sale'].includes(itemSubType))) {
 
                     record.setValue({
@@ -388,7 +389,7 @@ define([],
                     })
 
                     record.setValue({
-                        fieldId: 'custitemzab_default_rating_bill_in_arr'
+                        fieldId: 'custitemzab_default_bill_in_arrears'
                         , value: true
                     })
 
@@ -436,7 +437,7 @@ define([],
                     })
 
                     record.setValue({
-                        fieldId: 'custitemzab_default_rating_bill_in_arr'
+                        fieldId: 'custitemzab_default_bill_in_arrears'
                         , value: true
                     })
 
@@ -644,6 +645,25 @@ define([],
                     record.setValue({
                         fieldId: 'revrecforecastrule'
                         , value: ratable30Days
+                    })
+
+                    record.setValue({
+                        fieldId: 'createrevenueplanson'
+                        , value: fulfillmentAndDate
+                    })
+
+                }
+
+                if ([softwareNetSec90Day].includes(Number(pobAssignment))) {
+
+                    record.setValue({
+                        fieldId: 'revenuerecognitionrule'
+                        , value: ratable90DaysPlus52Days
+                    })
+
+                    record.setValue({
+                        fieldId: 'revrecforecastrule'
+                        , value: ratable90Days
                     })
 
                     record.setValue({
