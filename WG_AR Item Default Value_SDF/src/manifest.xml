@@ -1,4 +1,11 @@
 <manifest projecttype="ACCOUNTCUSTOMIZATION">
   <projectname>WG_AR Item Default Value_SDF</projectname>
   <frameworkversion>1.0</frameworkversion>
+  <dependencies>
+    <features>
+      <feature required="true">SERVERSIDESCRIPTING</feature>
+      <feature required="false">CRM</feature>
+      <feature required="false">CREATESUITEBUNDLES</feature>
+    </features>
+  </dependencies>
 </manifest>
