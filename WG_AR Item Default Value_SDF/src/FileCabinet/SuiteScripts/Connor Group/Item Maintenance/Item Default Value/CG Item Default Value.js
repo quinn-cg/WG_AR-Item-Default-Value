@@ -107,7 +107,7 @@ define([],
                 const kitHWEquipment = 25
                 const kitMSSP = 8
                 const kitSaaSBundle1Year = 6
-                const kitSaaSBundle3Year = 25
+                const kitSaaSBundle3Year = 26
                 const kitSubscriptionHW = 23
                 const POBkitVirtualHWBundle = 7
                 const pointsConsumption = 10
