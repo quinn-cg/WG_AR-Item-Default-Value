@@ -1,10 +1,16 @@
 /**
  * @NApiVersion 2.1
  * @NScriptType UserEventScript
+ * Default values stored on SKU Category and POB Assignment Records
+ * @abstract
+ * @author Quinn Christensen
  */
-define([],
-    
-    () => {
+define(['N/search'],
+    /**
+     * @param search
+     * @returns
+     */
+    (search) => {
 
         /**
          * Defines the function definition that is executed before record is loaded.
@@ -17,7 +23,7 @@ define([],
          */
         const beforeLoad = (scriptContext) => {
 
-            // Default Tax Schedule ahead of load. Avalara will be handling all tax calls.
+            // Default Tax Schedule ahead of load. Avalara will be handling all tax calls, so the value in this field is negligible but required.
             try {
 
                 // Tax Schedules
@@ -32,7 +38,7 @@ define([],
 
             catch (e) {
 
-                log.debug('Error Occured During Before Load', 'Error Occured setting Default Tax Schedule on Item Id ' + scriptContext.newRecord.id)
+                log.error('Error Occured During Before Load', 'Error Occured setting Default Tax Schedule on Item Id ' + scriptContext.newRecord.id)
 
             }
 
@@ -54,873 +60,215 @@ define([],
 
                 // Confirm accepted triggers
                 var eventTypes = ['edit', 'create']
-                if (!eventTypes.includes(scriptContext.type)) {return}
-
-                var record = scriptContext.newRecord
-
-
-                /**
-                 * Below we set the values for each list be used in the script, including: 
-                 * 
-                 * - SKU Category
-                 * - POB Assignment
-                 * 
-                 */
-
-                // SKU Category Definitions
-                const inventory3rdPartySoftwareOneTime = 8
-                const inventory3rdPartySoftwareTerm = 7
-                const inventoryNonSerializedHardware = 6
-                const inventorySerializedHardware = 5
-                const kitEquipment = 1
-                const kitBaseBoxEquipment = 28
-                const kitHardwareBundle = 2
-                const kitSaaSBundle = 3
-                const SKUkitVirtualHWBundle = 4
-                const msspBRFirmware = 18
-                const msspEquipment = 17
-                const msspPrePayPoints = 20
-                const msspVirtualHardware = 19
-                const softwareBandedTerm = 11
-                const softwareOneTime = 12
-                const softwareTerm = 10
-                const subscriptionHWEquipment = 13
-                const subscriptionHWLicense = 14
-                const subscriptionVirtualHWLicense = 27
-                const subscriptionVirtualHWEquipment = 26
-                const subscriptionSaaSBandedSKU = 16
-                const subscriptionSaaSProvisioningSKU = 15
-                const virtualHardware = 9
-                const discountRebate = 23
-                const softwareTermInitial = 29
-                const softwareBandedTermInitial = 30
-                const other = 24
-                const serializedWifiApplicance = 34
-                const revRecBaseBoxSoftware = 38
-                const revRecBaseBoxAppliance = 29
-                const kitBaseBoxAppliance = 28
-                const kitSoftwareTermBaseBoxActivation = 30
-
-                // POB Category Definitions
-                const hardware = 4
-                const kitHWBundle = 5
-                const kitHWEquipment = 25
-                const kitMSSP = 8
-                const kitSaaSBundle1Year = 6
-                const kitSaaSBundle3Year = 26
-                const kitSubscriptionHW = 23
-                const POBkitVirtualHWBundle = 7
-                const pointsConsumption = 10
-                const pointsPurchase = 9
-                const softwareAuthPoint1Year = 13
-                const softwareAuthPoint3Year = 14
-                const softwareEndpoint1Year = 2
-                const softwareEndpoint3Year = 3
-                const softwareNetSec1Year = 11
-                const softwareNetSec2Year = 16
-                const softwareNetSec3Year = 12
-                const softwareNetSec30Days = 15
-                const softwareNetSec5year = 17
-                const softwareNetSec6Year = 18
-                const softwareNetSec7Year = 19
-                const softwareNetSec90Day = 28
-                const softwareNoTerm = 1
-                const softwareWifi1Year = 20
-                const softwareWifi3Year = 21
-                const softwareWifi5Year = 22
-                const subscriptionSoftware = 24
-
-                // Income Accounts
-                const productRevenueInvoices41100 = 484
-                const serviceRevenueInvoices42100 = 486
-                const deferredPointsConsumptions25520 = 467
-                const kitRevenue41199 = 1201
-                
-                // Deferred Revenue Accounts
-                const deferredHardwareRevenue25198 = 1306
-                const deferredServiceRevenueInvoices25100 = 217
-                const deferredHardwareSubscriptionRevenue25299 = 1307
-                const deferredSaaSSubscriptionRevenue25399 = 1308
-                const deferredKitRevenue25199 = 1202
-
-                // COGS Accounts
-                const COGSBOMProduct51010 = 517
-                const royalitiesServices52100 = 811
-                
-                // Asset Accounts
-                const inventoryFinishedGoods12010 = 211
-                const inventory3rdPartySoftware12050 = 1309
-
-                // Revenue Recognition Rules
-                const uponFulfillment = 3
-                const ratable1YearPlus7Days = 15
-                const ratable3YearPlus7Days = 20
-                const ratable1YearPlus16Days = 16
-                const ratable3YearPlus16Days = 21
-                const ratable30DaysPlus52Days = 27
-                const ratable90DaysPlus52Days = 30
-                const ratable1YearPlus52Days = 17
-                const ratable2YearPlus52Days = 19
-                const ratable3YearPlus52Days = 22
-                const ratable5YearPlus52Days = 24
-                const ratable6YearPlus52Days = 25
-                const ratable7YearPlus52Days = 26
-                const ratable1YearPlus59Days = 18
-                const ratable3YearPlus59Days = 23
-                const ratable5YearPlus59Days = 29
-                const zabRatable = 4
-                const raDate = 6
-                const ratable1Year = 8
-                const ratable3Year = 10
-                const ratable30Days = 14
-                const ratable90Days = 32
-                const ratable2Year = 9
-                const ratable5Year = 11
-                const ratable6Year = 12
-                const ratable7Year = 13
-                const zabRatableSoftware = 5
-
-
-                // Create Revenue Plans On
-                const fulfillmentAndDate = 6
-                const zabRACreation = 1
-                const fulfillment = -3
-
-                // Tax Schedules
-                const defaultTaxSchedule = 1
-
-                // Subsidiary
-                const wgTechnologiesInc = 2
-
-                // Inherit Charge Schedule From
-                const inheritSubscription = 1
-
-                // Default ZAB Term
-                const zabTermMonths = 3
-
-                // Default ZAB Rate Type
-                const zabRateTypeFixed = 1
-                const zabRateTypeUsage = 2
-
-                // Default ZAB Rate Plan
-                const zabRatePlanSaaSCount = 3
-
-                // Default ZAB Proration
-                const doNotProrate = 3
-
-                // Default Revenue Type
-                const inheritFromItem = 3
-
-                // Revenue Type
-                const revenueTypeActual = 1
-
-                // Item Sub Type
-                
-
-
-                // Come back to the first one . . ..
-
-                // Retrieve Record Fields to Be Used for Conditional Validation
-                var skuCategory = record.getValue({
-                    fieldId: 'custitem_wg_sku_category'
-                })
-                log.debug('SKU Category', skuCategory)
-
-                var pobAssignment = record.getValue({
-                    fieldId: 'custitem_wg_pob_assignment'
-                })
-                log.debug('POB Assignment', pobAssignment)
-                
-                var activatableSKU = record.getValue({
-                    fieldId: 'custitem_activatable_sku'
-                })
-                log.debug('Activatable SKU', activatableSKU)
-
-                var recordType = record.type
-                log.debug('Record Type', recordType)
-
-                var itemSubType = scriptContext.newRecord.getValue({fieldId: 'subtype'})
-                log.debug('Item Sub Type', itemSubType)
-
-                // Conditional IF Statements based on above lists and record fields
-
-                if ((['serializedinventoryitem', 'inventoryitem', 'kititem'].includes(recordType)) || (['noninventoryitem', 'serviceitem'].includes(recordType) && ['Sale'].includes(itemSubType))) {
-
-                    record.setValue({
-                        fieldId: 'taxschedule'
-                        , value: defaultTaxSchedule
-                    })
-
-                    record.setValue({
-                        fieldId: 'subsidiary'
-                        , value: wgTechnologiesInc
-                    })
-
-                    if (!(skuCategory == other || skuCategory == discountRebate)) {
-
-                        record.setValue({
-                            fieldId: 'isfulfillable'
-                            , value: true
-                        })
-
-                    }
-
-
-
+                if (eventTypes.includes(scriptContext.type)) {
+                    defaultItemValues(scriptContext.record)
                 }
-
-                if ((recordType == 'serializedinventoryitem' && [inventorySerializedHardware, serializedWifiApplicance].includes(Number(skuCategory))) || (recordType == 'inventoryitem' && [inventoryNonSerializedHardware].includes(Number(skuCategory)))) {
-
-                    record.setValue({
-                        fieldId: 'incomeaccount'
-                        , value: productRevenueInvoices41100
-                    })
-
-                    record.setValue({
-                        fieldId: 'deferredrevenueaccount'
-                        , value: deferredHardwareRevenue25198
-                    })
-
-                    record.setValue({
-                        fieldId: 'cogsaccount'
-                        , value: COGSBOMProduct51010
-                    })
-
-                    record.setValue({
-                        fieldId: 'assetaccount'
-                        , value: inventoryFinishedGoods12010
-                    })
-
-                    record.setValue({
-                        fieldId: 'usebins'
-                        , value: true
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitem_wmsse_mix_item'
-                        , value: true
-                    })
-
-                }
-
-                if (recordType == 'serializedinventoryitem' && [inventory3rdPartySoftwareTerm, inventory3rdPartySoftwareOneTime].includes(Number(skuCategory))) {
-
-                    record.setValue({
-                        fieldId: 'incomeaccount'
-                        , value: serviceRevenueInvoices42100
-                    })
-
-                    record.setValue({
-                        fieldId: 'deferredrevenueaccount'
-                        , value: deferredServiceRevenueInvoices25100
-                    })
-
-                    record.setValue({
-                        fieldId: 'cogsaccount'
-                        , value: royalitiesServices52100
-                    })
-
-                    record.setValue({
-                        fieldId: 'assetaccount'
-                        , value: inventory3rdPartySoftware12050
-                    })
-
-                    record.setValue({
-                        fieldId: 'usebins'
-                        , value: false
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitem_wmsse_mix_item'
-                        , value: false
-                    })
-
-                }
-
-                if ((recordType == 'noninventoryitem' && [virtualHardware, revRecBaseBoxAppliance].includes(Number(skuCategory)) && ['Sale'].includes(itemSubType)) || (recordType == 'serviceitem' && [msspBRFirmware, msspVirtualHardware].includes(Number(skuCategory)) && ['Sale'].includes(itemSubType))) {
-
-                    record.setValue({
-                        fieldId: 'incomeaccount'
-                        , value: productRevenueInvoices41100
-                    })
-
-                    record.setValue({
-                        fieldId: 'deferredrevenueaccount'
-                        , value: deferredHardwareRevenue25198
-                    })
-
-                }
-
-                if ((recordType == 'serviceitem' && [softwareTerm, softwareBandedTerm, softwareOneTime, softwareTermInitial, softwareBandedTermInitial].includes(Number(skuCategory)) && ['Sale'].includes(itemSubType))
-                    || (recordType == 'noninventoryitem' && [revRecBaseBoxSoftware].includes(Number(skuCategory)) && ['Sale'].includes(itemSubType))) {
-
-                    record.setValue({
-                        fieldId: 'incomeaccount'
-                        , value: serviceRevenueInvoices42100
-                    })
-
-                    record.setValue({
-                        fieldId: 'deferredrevenueaccount'
-                        , value: deferredServiceRevenueInvoices25100
-                    })
-
-                }
-
-                if (recordType == 'serviceitem' && [subscriptionHWLicense, subscriptionVirtualHWLicense].includes(Number(skuCategory)) && ['Sale'].includes(itemSubType)) {
-
-                    record.setValue({
-                        fieldId: 'incomeaccount'
-                        , value: serviceRevenueInvoices42100
-                    })
-
-                    record.setValue({
-                        fieldId: 'deferredrevenueaccount'
-                        , value: deferredHardwareSubscriptionRevenue25299
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_default_inhrt_chrg_sched'
-                        , value: inheritSubscription
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_default_term'
-                        , value: zabTermMonths
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_default_bill_in_arrears'
-                        , value: true
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_default_rate_type'
-                        , value: zabRateTypeFixed
-                    })
-                    
-                    record.setValue({
-                        fieldId: 'custitemzab_default_proration_type'
-                        , value: doNotProrate
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_default_revenue_type'
-                        , value: inheritFromItem
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_revenue_type'
-                        , value: revenueTypeActual
-                    })
-                }
-
-                if (recordType == 'serviceitem' && [subscriptionSaaSProvisioningSKU].includes(Number(skuCategory)) && ['Sale'].includes(itemSubType)) {
-
-                    record.setValue({
-                        fieldId: 'incomeaccount'
-                        , value: serviceRevenueInvoices42100
-                    })
-
-                    record.setValue({
-                        fieldId: 'deferredrevenueaccount'
-                        , value: deferredSaaSSubscriptionRevenue25399
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_default_inhrt_chrg_sched'
-                        , value: inheritSubscription
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_default_term'
-                        , value: zabTermMonths
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_default_bill_in_arrears'
-                        , value: true
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_default_rate_type'
-                        , value: zabRateTypeUsage
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_default_rate_plan'
-                        , value: zabRatePlanSaaSCount
-                    })
-                    
-                    record.setValue({
-                        fieldId: 'custitemzab_default_proration_type'
-                        , value: doNotProrate
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_default_revenue_type'
-                        , value: inheritFromItem
-                    })
-
-                    record.setValue({
-                        fieldId: 'custitemzab_revenue_type'
-                        , value: revenueTypeActual
-                    })
-
-                }
-
-                if (recordType == 'serviceitem' && [msspPrePayPoints].includes(Number(skuCategory)) && ['Sale'].includes(itemSubType)) {
-
-                    record.setValue({
-                        fieldId: 'incomeaccount'
-                        , value: deferredPointsConsumptions25520
-                    })
-
-                    record.setValue({
-                        fieldId: 'deferredrevenueaccount'
-                        , value: deferredPointsConsumptions25520
-                    })
-
-                }
-
-                if (recordType == 'kititem' && [kitEquipment, kitHardwareBundle, kitSaaSBundle, SKUkitVirtualHWBundle, msspEquipment, kitBaseBoxEquipment, kitBaseBoxAppliance, kitSoftwareTermBaseBoxActivation].includes(Number(skuCategory))) {
-
-                    record.setValue({
-                        fieldId: 'incomeaccount'
-                        , value: kitRevenue41199
-                    })
-
-                    record.setValue({
-                        fieldId: 'deferredrevenueaccount'
-                        , value: deferredKitRevenue25199
-                    })
-
-                }
-
-                if (recordType == 'kititem' && [subscriptionHWEquipment, subscriptionVirtualHWEquipment].includes(Number(skuCategory))) {
-
-                    record.setValue({
-                        fieldId: 'incomeaccount'
-                        , value: kitRevenue41199
-                    })
-
-                    record.setValue({
-                        fieldId: 'deferredrevenueaccount'
-                        , value: deferredHardwareSubscriptionRevenue25299
-                    })
-
-                }
-
-                if (recordType == 'kititem' && [discountRebate].includes(Number(skuCategory))) {
-
-                    record.setValue({
-                        fieldId: 'vsoesopgroup'
-                        , value: 'EXCLUDE'
-                    })
-
-                }
-
-                if ([hardware, softwareNoTerm, pointsPurchase].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: uponFulfillment
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: raDate
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillment
-                    })
-
-                }
-                
-                if ([hardware, softwareNoTerm, pointsPurchase].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: uponFulfillment
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: raDate
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillment
-                    })
-
-                }
-
-                if ([softwareEndpoint1Year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable1YearPlus7Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable1Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                if ([softwareEndpoint3Year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable3YearPlus7Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable3Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                if ([softwareAuthPoint1Year, kitSaaSBundle1Year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable1YearPlus16Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable1Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                if ([softwareAuthPoint3Year, kitSaaSBundle3Year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable3YearPlus16Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable3Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                if ([softwareNetSec30Days].includes(Number(pobAssignment))) {
-
-                    log.debug('enter', 'entered')
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable30DaysPlus52Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable30Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                if ([softwareNetSec90Day].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable90DaysPlus52Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable90Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                if ([softwareNetSec1Year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable1YearPlus52Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable1Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                if ([softwareNetSec2Year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable2YearPlus52Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable2Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                if ([softwareNetSec3Year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable3YearPlus52Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable3Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                if ([softwareNetSec5year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable5YearPlus52Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable5Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-                
-                if ([softwareNetSec6Year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable6YearPlus52Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable6Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                
-                if ([softwareNetSec7Year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable7YearPlus52Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable7Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                
-                if ([softwareWifi1Year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable1YearPlus59Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable1Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                
-                if ([softwareWifi3Year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable3YearPlus59Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable3Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                
-                if ([softwareWifi5Year].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: ratable5YearPlus59Days
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: ratable5Year
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: fulfillmentAndDate
-                    })
-
-                }
-
-                
-                if ([subscriptionSoftware].includes(Number(pobAssignment))) {
-
-                    record.setValue({
-                        fieldId: 'revenuerecognitionrule'
-                        , value: zabRatableSoftware
-                    })
-
-                    record.setValue({
-                        fieldId: 'revrecforecastrule'
-                        , value: zabRatable
-                    })
-
-                    record.setValue({
-                        fieldId: 'createrevenueplanson'
-                        , value: zabRACreation
-                    })
-
-                }
-
-                if (activatableSKU != '') {
-                    
-                    record.setValue({
-                        fieldId: 'vsoesopgroup'
-                        , value: 'EXCLUDE'
-                    })
-
-                }
-                else {
-
-                    record.setValue({
-                        fieldId: 'vsoesopgroup'
-                        , value: 'NORMAL'
-                    })
-
-                }
-
-                log.debug('Income Account Before . . .', scriptContext.oldRecord.getValue({fieldId: 'incomeaccount'}))
-                log.debug('Income Account After . . .', scriptContext.newRecord.getValue({fieldId: 'incomeaccount'}))
-
-                log.debug('DR Rev Account Before . . .', scriptContext.oldRecord.getValue({fieldId: 'deferredrevenueaccount'}))
-                log.debug('DR Rev Account After . . .', scriptContext.newRecord.getValue({fieldId: 'deferredrevenueaccount'}))
-
-                log.debug('COGS Account Before . . .', scriptContext.oldRecord.getValue({fieldId: 'cogsaccount'}))
-                log.debug('COGS Account After . . .', scriptContext.newRecord.getValue({fieldId: 'cogsaccount'}))
-                
-                log.debug('Asset Account Before . . .', scriptContext.oldRecord.getValue({fieldId: 'assetaccount'}))
-                log.debug('Asset Account After . . .', scriptContext.newRecord.getValue({fieldId: 'assetaccount'}))
-
-                log.debug('Revenue Recognition Rule Before . . .', scriptContext.oldRecord.getValue({fieldId: 'revenuerecognitionrule'}))         
-                log.debug('Revenue Recognition Rule After . . .', scriptContext.newRecord.getValue({fieldId: 'revenuerecognitionrule'}))                
-       
-                log.debug('Rev Rec Forecast Rule Before . . .', scriptContext.oldRecord.getValue({fieldId: 'revrecforecastrule'}))
-                log.debug('Rev Rec Forecast Rule After . . .', scriptContext.newRecord.getValue({fieldId: 'revrecforecastrule'}))
-
-                log.debug('Create Rev Plans On Before . . .', scriptContext.oldRecord.getValue({fieldId: 'createrevenueplanson'}))
-                log.debug('Create Rev Plans On After . . .', scriptContext.newRecord.getValue({fieldId: 'createrevenueplanson'}))
-
-                log.debug('Allocation Type Before . . .', scriptContext.oldRecord.getValue({fieldId: 'vsoesopgroup'}))
-                log.debug('Allocation Type After . . .', scriptContext.newRecord.getValue({fieldId: 'vsoesopgroup'}))
-
 
             }
 
             catch(e) {
 
-                log.debug(e.name, e.message)
+                log.error(e.name, e.message)
 
             }
 
+        }
+
+        /**
+         * Create mappping dictionary of Sku Category and POB Assignment. Update item record ahead of submission.
+         * @abstract
+         * @namespace defaultItemValues
+         * @param {Object} rec - New item record to be submitted to the database
+         */
+        function defaultItemValues(rec) {
+
+            var rec = scriptContext.newRecord
+
+            // Pull Default Values for SKU Category and POB Assignment
+
+            /**
+             * SKU Category Mapping:
+             * 
+             * > Income Account
+             *      > SKU Field: custrecord_wg_sku_cat_income_acct
+             *      > Item Field: incomeaccount
+             * > Deferred Revenue Account
+             *      > SKU Field: custrecord_wg_sku_cat_deferred_rev_acct
+             *      > Item Field: deferredrevenueaccount
+             * > Asset Account
+             *      > SKU Field: custrecord_wg_sku_cat_asset_acct
+             *      > Item Field: assetaccount
+             * > COGS Account
+             *      > SKU Field: custrecord_wg_sku_cat_cogs_acct
+             *      > Item Field: cogsaccount
+             * > ZAB Default Rate Type
+             *      > SKU Field: custrecord_wg_sku_cat_zab_rate_type
+             *      > Item Field: custitemzab_default_rate_type
+             * > ZAB Default Rate Plan
+             *      > SKU Field: custrecord_wg_sku_cat_zab_rate_plan
+             *      > Item Field: custitemzab_default_rate_plan
+             * > Inherit Charge Schedule From
+             *      > SKU Field: custrecord_wg_sku_cat_inherit_chg_sched
+             *      > Item Field: custitemzab_default_inhrt_chrg_sched
+             * > Default Bill in Arrears
+             *      > SKU Field: custrecord_wg_sku_cat_bill_in_arrear
+             *      > Item Field: custitemzab_default_bill_in_arrears
+             * > Default Term
+             *      > SKU Field: custrecord_wg_sku_cat_default_term
+             *      > Item Field: custitemzab_default_term
+             * > Default Proration Type
+             *      > SKU Field: custrecord_wg_sku_cat_zab_proration_type
+             *      > Item Field: custitemzab_default_proration_type
+             * > Revenue Type
+             *      > SKU Field: custrecord_wg_sku_cat_default_rev_type
+             *      > Item Field: custitemzab_revenue_type
+             * > Default Revenue Type
+             *      > SKU Field: custrecord_wg_sku_cat_default_rev_type
+             *      > Item Field: custitemzab_default_revenue_type
+             * > Can Be Fulfilled / Received
+             *      > SKU Field: custrecord_wg_sku_cat_fulfillable
+             *      > Item Field: isfulfillable
+             * > Use Bins
+             *      > SKU Field: custrecord_wg_sku_cat_use_bins
+             *      > Item Field: usebins
+             * > WMS Mix Items in Bins
+             *      > SKU Field: custrecord_wg_sku_cat_wms_mixitem_in_bin
+             *      > Item Field: custitem_wmsse_mix_item
+             */
+            
+            var skuCategoryMapping = {
+                custrecord_wg_sku_cat_income_acct: 'incomeaccount'
+              , custrecord_wg_sku_cat_deferred_rev_acct: 'deferredrevenueaccount'
+              , custrecord_wg_sku_cat_asset_acct: 'assetaccount'
+              , custrecord_wg_sku_cat_cogs_acct: 'cogsaccount'
+              , custrecord_wg_sku_cat_zab_rate_type: 'custitemzab_default_rate_type'
+              , custrecord_wg_sku_cat_zab_rate_plan: 'custitemzab_default_rate_plan'
+              , custrecord_wg_sku_cat_inherit_chg_sched: 'custitemzab_default_inhrt_chrg_sched'
+              , custrecord_wg_sku_cat_bill_in_arrear: 'custitemzab_default_bill_in_arrears'
+              , custrecord_wg_sku_cat_default_term: 'custitemzab_default_term'
+              , custrecord_wg_sku_cat_zab_proration_type: 'custitemzab_default_proration_type'
+              , custrecord_wg_sku_cat_default_rev_type: 'custitemzab_revenue_type'
+              , custrecord_wg_sku_cat_default_rev_type: 'custitemzab_default_revenue_type'
+              , custrecord_wg_sku_cat_fulfillable: 'isfulfillable'
+              , custrecord_wg_sku_cat_use_bins: 'usebins'
+              , custrecord_wg_sku_cat_wms_mixitem_in_bin: 'custitem_wmsse_mix_item'
+            }
+
+            /**
+             * POB Assignment Mapping:
+             * 
+             * > Revenue Recognition Rule
+             *      > POB Field: custrecord_wg_pob_rev_rec_rule
+             *      > Item Field: revenuerecognitionrule
+             * > Rev Rec Forecast Rule
+             *      > POB Field: custrecord_wg_pob_rev_rec_forecast_rule
+             *      > Item Field: revrecforecastrule
+             * > Create Revenue Plan On
+             *      > POB Field: custrecord_wg_pob_create_rev_plan_on
+             *      > Item Field: createrevenueplanson
+             */
+            
+            var pobAssignmentMapping = {
+                custrecord_wg_pob_rev_rec_rule: 'revenuerecognitionrule'
+              , custrecord_wg_pob_rev_rec_forecast_rule: 'revrecforecastrule'
+              , custrecord_wg_pob_create_rev_plan_on: 'createrevenueplanson'
+            };
+            
+            /**
+             * Set the Default Values from Mapping
+             */
+
+            // Default SKU Category Values
+            if (rec.getValue('custitem_wg_sku_category')) {
+                copyMappedFields(skuCategoryMapping, rec, 'customrecord_wg_sku_category', rec.getValue('custitem_wg_sku_category'), 'custrecord_wg_sku_cat_excl_default_value')
+            }
+
+            // Default POB Assignment Values
+            if (rec.getValue('custitem_wg_pob_assignment')) {
+                copyMappedFields(pobAssignmentMapping, rec, 'customrecord_wg_pob_assignment', rec.getValue('custitem_wg_pob_assignment'), 'isinactive')
+            }
 
         }
 
+        /**
+         * Copy field values based on mapped dictionary.
+         * @abstract
+         * @namespace copyMappedFields
+         * @param {Object} mappedDict - Dictionary mapping to item record.
+         * @param {Object} rec - New item record to be submitted to the database.
+         * @param {string} recordLookupType - Item record type to be used during lookup fields function.
+         * @param {number} recordLookupId - Internal Id of item record.
+         * @param {string} exclusionField - field to determine if default values should be set.
+         */
+        function copyMappedFields(mappedDict, rec, recordLookupType, recordLookupId, exclusionField) {
+
+            var doNotSetDefaultValues = false
+            if (exclusionField) {
+                // Determine if Excluded
+                var lookupExclusion = search.lookupFields({
+                    type: recordLookupType
+                    , id: recordLookupId
+                    , columns: exclusionField
+                })
+
+                if (lookupExclusion[exclusionField]) {
+                    doNotSetDefaultValues = lookupExclusion[exclusionField]
+                }
+            }
+
+            if (!doNotSetDefaultValues) {
+
+                // Lookup The Values of Mapped Dict
+                var lookupResults = search.lookupFields({
+                    type: recordLookupType
+                    , id: recordLookupId
+                    , columns: Object.keys(mappedDict)
+                })
+        
+                var fieldValue
+                for (var key in lookupResults) {
+        
+                    try {
+                        // Validate Lookup Results Values
+                        // Determine if results are returned in array to determine handling.
+                        if (
+                            lookupResults[key]
+                            && Array.isArray(lookupResults[key])
+                            && lookupResults[key].length > 0
+                        ) {
+                            fieldValue = lookupResults[key][0].value
+                        }
+                        else if (
+                            !(lookupResults[key] === null || lookupResults[key] === undefined || lookupResults[key] === '')
+                            && !Array.isArray(lookupResults[key])
+                        ) {
+                            fieldValue = lookupResults[key]
+                        }
+                        else {
+                            fieldValue = ''
+                        }
+
+                        log.debug('Values To Be Set', `Mapped Field: ${key} 
+                                                        --- Field: ${mappedDict[key]} 
+                                                        --- Lookup Value: ${JSON.stringify(lookupResults[key])}
+                                                        --- Field Value: ${fieldValue}`)
+
+                        rec.setValue({
+                            fieldId: mappedDict[key]
+                            , value: fieldValue
+                        })                                                   
+
+                    }
+                    catch(e) {
+                        log.error('An Error Occured Defaulting Item Value', e)
+                    }
+        
+                }
+
+
+            }
+    
+        }
 
         return {beforeLoad, beforeSubmit}
 
